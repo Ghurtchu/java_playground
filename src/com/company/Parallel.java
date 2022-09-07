@@ -7,32 +7,20 @@ public class Parallel {
 
     public static void main(String[] args) {
 
-        var emptyTup = new Tuple<Integer, Integer>();
+        Tuple<Integer, Integer> emptyTup = Tuple.empty();
 
-        var c1Task = new Callable<Integer> () {
-            @Override
-            public Integer call() throws Exception {
-                return new java.util.Random().nextInt(10000);
-            }
-        };
+        Callable<Integer> c1Task = () -> new java.util.Random().nextInt(10000);
+        Callable<Integer> c2Task = () -> 500_000_000;
 
-        var c2Task = new Callable<Integer>() {
-
-            @Override
-            public Integer call() throws Exception {
-                return 500_000_000;
-            }
-        };
-
-        var updatedTup = emptyTup.compute(c1Task, c2Task);
+         var updatedTup = emptyTup.compute(c1Task, c2Task);
 
         System.out.println(updatedTup);
     }
 
     private static class Tuple<A, B> implements ComputableInParallel<A, B> {
 
-        A a = null;
-        B b = null;
+        volatile A a = null;
+        volatile B b = null;
 
         public Tuple() {
 
@@ -41,6 +29,10 @@ public class Parallel {
         public Tuple(A a, B b) {
             this.a = a;
             this.b = b;
+        }
+
+        public static <A, B> Tuple<A, B> empty() {
+            return new Tuple<>();
         }
 
         @Override
